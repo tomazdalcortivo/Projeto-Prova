@@ -1,50 +1,54 @@
 package br.edu.ifpr.irati.ads.dao;
 
+import br.edu.ifpr.irati.ads.db.Conexao;
 import br.edu.ifpr.irati.ads.modelo.Alternativa;
 import br.edu.ifpr.irati.ads.modelo.Disciplina;
 import br.edu.ifpr.irati.ads.modelo.Prova;
 import br.edu.ifpr.irati.ads.modelo.Questao;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class ProvaDAO {
-    
-    
-    public Prova carregarProva(){
-        
+
+    public Prova carregarProva() {
+
         Prova p = new Prova();
         p.setId(1);
         p.setAno(2023);
         List<Questao> questoes = new ArrayList<>();
         //adicionar as questões
         Alternativa altq1[] = new Alternativa[4];
-        altq1[0] = new Alternativa(1,"No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 1);
-        altq1[1] = new Alternativa(2,"No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 2);
-        altq1[2] = new Alternativa(3,"No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 4);
-        altq1[3] = new Alternativa(4,"No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 8);
+        altq1[0] = new Alternativa(1, "No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 1);
+        altq1[1] = new Alternativa(2, "No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 2);
+        altq1[2] = new Alternativa(3, "No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 4);
+        altq1[3] = new Alternativa(4, "No trecho \"Eu acho que ele é uma droga de liberação lenta\" há uma oração subordinada substantiva objetiva direta introduzida pelo termo que\"", 8);
         Questao q1 = new Questao(1, 1,
-                new Disciplina(1,"Língua Portuguesa"),
-                "", 
-                "De acordo com as normas da língua portuguesa, assinale o que for correto.", 
-                "/imagens_questoes/img_q12_2023.png", 
+                new Disciplina(1, "Língua Portuguesa"),
+                "",
+                "De acordo com as normas da língua portuguesa, assinale o que for correto.",
+                "/imagens_questoes/img_q12_2023.png",
                 altq1, 5);
         questoes.add(q1);
-        
-        
+
         Alternativa altq2[] = new Alternativa[4];
-        altq2[0] = new Alternativa(1,"Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 1);
-        altq2[1] = new Alternativa(1,"Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 2);
-        altq2[2] = new Alternativa(1,"Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 4);
-        altq2[3] = new Alternativa(1,"Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 8);
-        Questao q2 = new Questao(2, 2, 
-                new Disciplina(1,"Português"),
-                "", 
-                "Conforme o texto, assinale o que for correto:", 
-                "", 
+        altq2[0] = new Alternativa(1, "Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 1);
+        altq2[1] = new Alternativa(1, "Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 2);
+        altq2[2] = new Alternativa(1, "Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 4);
+        altq2[3] = new Alternativa(1, "Podemos afirmar que a fratura social à qual se refere o professor João Cezar de Castro Rocha está ligada ao fato de a violência ser muitas vezes naturalizada e oculta em nosso país", 8);
+        Questao q2 = new Questao(2, 2,
+                new Disciplina(1, "Português"),
+                "",
+                "Conforme o texto, assinale o que for correto:",
+                "",
                 altq2, 8);
-        questoes.add(q2);      
+        questoes.add(q2);
         p.setQuestoes(questoes);
-        
+
         Alternativa altq3[] = new Alternativa[4];
         altq3[0] = new Alternativa(1, " Vibrio cholerae é uma bactéria do tipo vibrião. É o agente etiológico da cólera, doença intestinal grave. A infecção humana ocorre tipicamente pela via fecal-oral, ou seja, pela ingestão de água e de alimentos contaminados.", 1);
         altq3[1] = new Alternativa(2, " Vibrio cholerae é uma bactéria do tipo vibrião. É o agente etiológico da cólera, doença intestinal grave. A infecção humana ocorre tipicamente pela via fecal-oral, ou seja, pela ingestão de água e de alimentos contaminados.", 2);
@@ -138,7 +142,6 @@ public class ProvaDAO {
         altq10[1] = new Alternativa(2, "A área do trapézio é 26 centímetros quadrados.", 2);
         altq10[2] = new Alternativa(4, "A área do trapézio é 26 centímetros quadrados.", 4);
         altq10[3] = new Alternativa(8, "A área do trapézio é 26 centímetros quadrados.", 8);
-
         Questao q10 = new Questao(10, 10,
                 new Disciplina(3, "Matemática"),
                 "",
@@ -149,5 +152,102 @@ public class ProvaDAO {
         questoes.add(q10);
         return p;
     }
-    
+
+    private void criarTabelas(Connection connection) throws SQLException {
+        String criarTabelaDisciplina = "CREATE TABLE IF NOT EXISTS disciplinas ("
+                + "id INT PRIMARY KEY, "
+                + "nome VARCHAR(255) NOT NULL"
+                + ");";
+
+        String criarTabelaQuestao = "CREATE TABLE IF NOT EXISTS questoes ("
+                + "id INT PRIMARY KEY, "
+                + "numero INT NOT NULL, "
+                + "disciplina_id INT NOT NULL, "
+                + "texto_introdutorio TEXT, "
+                + "enunciado TEXT NOT NULL, "
+                + "figura VARCHAR(255), "
+                + "soma_gabarito INT NOT NULL, "
+                + "FOREIGN KEY (disciplina_id) REFERENCES disciplinas(id)"
+                + ");";
+
+        String criarTabelaAlternativa = "CREATE TABLE IF NOT EXISTS alternativas ("
+                + "id INT PRIMARY KEY, "
+                + "questao_id INT NOT NULL, "
+                + "texto TEXT NOT NULL, "
+                + "valor INT NOT NULL, "
+                + "FOREIGN KEY (questao_id) REFERENCES questoes(id)"
+                + ");";
+
+        try (Statement stmt = connection.createStatement()) {
+            stmt.execute(criarTabelaDisciplina);
+            stmt.execute(criarTabelaQuestao);
+            stmt.execute(criarTabelaAlternativa);
+        }
+    }
+
+    public void salvarProva(Prova prova) {
+        Connection connection = null;
+        PreparedStatement psDisciplina = null;
+        PreparedStatement psQuestao = null;
+        PreparedStatement psAlternativa = null;
+
+        try {
+            connection = new Conexao().Connect();
+            connection.setAutoCommit(false);
+
+            criarTabelas(connection);
+
+            String insertDisciplinaSQL = "INSERT INTO disciplinas (id, nome) VALUES (?, ?) ON DUPLICATE KEY UPDATE nome = VALUES(nome)";
+            String insertQuestaoSQL = "INSERT INTO questoes (id, numero, disciplina_id, texto_introdutorio, enunciado, figura, soma_gabarito) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE numero = VALUES(numero), disciplina_id = VALUES(disciplina_id), texto_introdutorio = VALUES(texto_introdutorio), enunciado = VALUES(enunciado), figura = VALUES(figura), soma_gabarito = VALUES(soma_gabarito)";
+            String insertAlternativaSQL = "INSERT INTO alternativas (id, questao_id, texto, valor) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE texto = VALUES(texto), valor = VALUES(valor)";
+
+            psDisciplina = connection.prepareStatement(insertDisciplinaSQL);
+            psQuestao = connection.prepareStatement(insertQuestaoSQL);
+            psAlternativa = connection.prepareStatement(insertAlternativaSQL);
+
+            for (Questao questao : prova.getQuestoes()) {
+                Disciplina disciplina = questao.getDisciplina();
+
+                // Inserir disciplina
+                psDisciplina.setInt(1, disciplina.getId());
+                psDisciplina.setString(2, disciplina.getNome());
+                psDisciplina.executeUpdate();
+
+                // Inserir questão
+                psQuestao.setInt(1, questao.getId());
+                psQuestao.setInt(2, questao.getNumero());
+                psQuestao.setInt(3, disciplina.getId());
+                psQuestao.setString(4, questao.getTextoIntrodutorio());
+                psQuestao.setString(5, questao.getEnunciado());
+                psQuestao.setString(6, questao.getFigura());
+                psQuestao.setInt(7, questao.getSomaGabarito());
+                psQuestao.executeUpdate();
+
+                // Inserir alternativas
+                for (Alternativa alternativa : questao.getAlternativas()) {
+                    psAlternativa.setInt(1, alternativa.getId());
+                    psAlternativa.setInt(2, questao.getId());
+                    psAlternativa.setString(3, alternativa.getTexto());
+                    psAlternativa.setInt(4, alternativa.getValor());
+                    psAlternativa.executeUpdate();
+                }
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            Conexao.closePreparedStatement(psDisciplina);
+            Conexao.closePreparedStatement(psQuestao);
+            Conexao.closePreparedStatement(psAlternativa);
+            Conexao.closeConnection(connection);
+        }
+    }
 }
