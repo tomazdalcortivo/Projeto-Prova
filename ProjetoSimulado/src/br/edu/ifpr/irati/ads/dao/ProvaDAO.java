@@ -12,6 +12,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ProvaDAO {
 
@@ -208,12 +211,10 @@ public class ProvaDAO {
             for (Questao questao : prova.getQuestoes()) {
                 Disciplina disciplina = questao.getDisciplina();
 
-                // Inserir disciplina
                 psDisciplina.setInt(1, disciplina.getId());
                 psDisciplina.setString(2, disciplina.getNome());
                 psDisciplina.executeUpdate();
 
-                // Inserir questão
                 psQuestao.setInt(1, questao.getId());
                 psQuestao.setInt(2, questao.getNumero());
                 psQuestao.setInt(3, disciplina.getId());
@@ -223,7 +224,6 @@ public class ProvaDAO {
                 psQuestao.setInt(7, questao.getSomaGabarito());
                 psQuestao.executeUpdate();
 
-                // Inserir alternativas
                 for (Alternativa alternativa : questao.getAlternativas()) {
                     psAlternativa.setInt(1, alternativa.getId());
                     psAlternativa.setInt(2, questao.getId());
@@ -249,5 +249,103 @@ public class ProvaDAO {
             Conexao.closePreparedStatement(psAlternativa);
             Conexao.closeConnection(connection);
         }
+    }
+
+    public Prova carregarProvaDoBanco() {
+        Connection connection = null;
+        PreparedStatement psProva = null;
+        PreparedStatement psQuestoes = null;
+        PreparedStatement psAlternativas = null;
+        ResultSet rsProva = null;
+        ResultSet rsQuestoes = null;
+        ResultSet rsAlternativas = null;
+
+        Prova prova = new Prova();
+        Map<Integer, Disciplina> disciplinasMap = new HashMap<>();
+        Map<Integer, List<Alternativa>> alternativasMap = new HashMap<>();
+
+        try {
+            connection = new Conexao().Connect();
+
+            int provaId = 1;
+            String selectProvaSQL = "SELECT * FROM provas WHERE id = ?";
+            String selectQuestoesSQL = "SELECT * FROM questoes WHERE prova_id = ?";
+            String selectAlternativasSQL = "SELECT * FROM alternativas WHERE questao_id = ?";
+
+            psProva = connection.prepareStatement(selectProvaSQL);
+            psProva.setInt(1, provaId);
+            rsProva = psProva.executeQuery();
+
+            if (rsProva.next()) {
+                prova.setId(rsProva.getInt("id"));
+                prova.setAno(rsProva.getInt("ano"));
+            }
+
+            psQuestoes = connection.prepareStatement(selectQuestoesSQL);
+            psQuestoes.setInt(1, provaId);
+            rsQuestoes = psQuestoes.executeQuery();
+
+            while (rsQuestoes.next()) {
+                int questaoId = rsQuestoes.getInt("id");
+                int disciplinaId = rsQuestoes.getInt("disciplina_id");
+
+                if (!disciplinasMap.containsKey(disciplinaId)) {
+                    String selectDisciplinaSQL = "SELECT * FROM disciplinas WHERE id = ?";
+                    PreparedStatement psDisciplina = connection.prepareStatement(selectDisciplinaSQL);
+                    psDisciplina.setInt(1, disciplinaId);
+                    ResultSet rsDisciplina = psDisciplina.executeQuery();
+                    if (rsDisciplina.next()) {
+                        Disciplina disciplina = new Disciplina(rsDisciplina.getInt("id"), rsDisciplina.getString("nome"));
+                        disciplinasMap.put(disciplinaId, disciplina);
+                    }
+                    Conexao.closePreparedStatement(psDisciplina);
+                }
+
+                Questao questao = new Questao(
+                        questaoId,
+                        rsQuestoes.getInt("numero"),
+                        disciplinasMap.get(disciplinaId),
+                        rsQuestoes.getString("texto_introdutorio"),
+                        rsQuestoes.getString("enunciado"),
+                        rsQuestoes.getString("figura"),
+                        new Alternativa[4], // Placeholder para as alternativas
+                        rsQuestoes.getInt("soma_gabarito")
+                );
+
+                if (!alternativasMap.containsKey(questaoId)) {
+                    alternativasMap.put(questaoId, new ArrayList<>());
+                }
+
+                psAlternativas = connection.prepareStatement(selectAlternativasSQL);
+                psAlternativas.setInt(1, questaoId);
+                rsAlternativas = psAlternativas.executeQuery();
+
+                while (rsAlternativas.next()) {
+                    Alternativa alternativa = new Alternativa(
+                            rsAlternativas.getInt("id"),
+                            rsAlternativas.getString("texto"),
+                            rsAlternativas.getInt("valor")
+                    );
+                    alternativasMap.get(questaoId).add(alternativa);
+                }
+
+                Alternativa[] alternativasArray = alternativasMap.get(questaoId).toArray(new Alternativa[0]);
+                questao.setAlternativas(alternativasArray);
+                prova.getQuestoes().add(questao);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Conexao.closeResultSet(rsProva);
+            Conexao.closeResultSet(rsQuestoes);
+            Conexao.closeResultSet(rsAlternativas);
+            Conexao.closePreparedStatement(psProva);
+            Conexao.closePreparedStatement(psQuestoes);
+            Conexao.closePreparedStatement(psAlternativas);
+            Conexao.closeConnection(connection);
+        }
+
+        return prova;
     }
 }
