@@ -16,44 +16,44 @@ import javax.swing.UIManager.LookAndFeelInfo;
 public class SimuladoGUI extends javax.swing.JFrame {
 
     private String cpfResposta;
-    
+
     private Questao questaoAtual;
     private Prova prova;
     private int somaAtual = 0;
     private JCheckBox checkBoxes[];
     private int pontuacao = 60;
-    
-    public SimuladoGUI() {        
-        initComponents();        
-        String cpf = JOptionPane.showInputDialog(this,"Informe seu CPF","Identificação do Usuário",JOptionPane.QUESTION_MESSAGE);        
+
+    public SimuladoGUI() {
+        initComponents();
+        String cpf = JOptionPane.showInputDialog(this, "Informe seu CPF", "Identificação do Usuário", JOptionPane.QUESTION_MESSAGE);
         this.cpfResposta = cpf;
         //validar cpf e verificar se tem respostas no banco de dados
-        this.cpfResposta= "077.422.381-74";
+        this.cpfResposta = "077.422.381-74";
         initialAdjustments();
         ProvaDAO provaDAO = new ProvaDAO();
         prova = provaDAO.carregarProva();
-        DefaultComboBoxModel model = 
-                new DefaultComboBoxModel<>(prova.getQuestoes().toArray());
+        DefaultComboBoxModel model
+                = new DefaultComboBoxModel<>(prova.getQuestoes().toArray());
         jComboBoxEscolhaQuestao.setModel(model);
-        jComboBoxEscolhaQuestao.addItemListener(new ComboBoxHandler());       
+        jComboBoxEscolhaQuestao.addItemListener(new ComboBoxHandler());
         this.questaoAtual = prova.getQuestoes().get(0);
         this.atualizarQuestaoTela();
-        
+
         CheckBoxHandler boxHandler = new CheckBoxHandler();
         jCheckBoxOp01.addItemListener(boxHandler);
         jCheckBoxOp02.addItemListener(boxHandler);
         jCheckBoxOp04.addItemListener(boxHandler);
         jCheckBoxOp08.addItemListener(boxHandler);
-        
+
         checkBoxes = new JCheckBox[4];
         checkBoxes[0] = jCheckBoxOp01;
         checkBoxes[1] = jCheckBoxOp02;
         checkBoxes[2] = jCheckBoxOp04;
         checkBoxes[3] = jCheckBoxOp08;
-        
+
     }
 
-    public void initialAdjustments(){
+    public void initialAdjustments() {
         //deixei esse código caso queiram experimentar outros look and feels
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -72,100 +72,95 @@ public class SimuladoGUI extends javax.swing.JFrame {
         this.setVisible(true);
         this.setLocationRelativeTo(null);
         this.setExtendedState(this.MAXIMIZED_BOTH);
-        this.setTitle("Simulado do PSS ["+cpfResposta+"]");
+        this.setTitle("Simulado do PSS [" + cpfResposta + "]");
     }
-    
-    private boolean[] gerarArrayMarcacao(int v){
+
+    private boolean[] gerarArrayMarcacao(int v) {
         double valor = v;
         int n_alt = questaoAtual.getAlternativas().length;
         boolean array[] = new boolean[n_alt];
-        for (int i = n_alt-1; i >= 0; i--){
+        for (int i = n_alt - 1; i >= 0; i--) {
             double v_alt = Math.pow(2, i);
-            if (valor >= v_alt){
+            if (valor >= v_alt) {
                 array[i] = true;
                 valor = valor - v_alt;
-            }else{
+            } else {
                 array[i] = false;
-            }            
+            }
         }
-        return array;        
+        return array;
     }
-    
-    private double corrigirQuestao(){
-        
+
+    private double corrigirQuestao() {
+
         int somaGabarito = questaoAtual.getSomaGabarito();
-        int somaMarcada = somaAtual;       
-        
+        int somaMarcada = somaAtual;
+
         boolean arrayGabarito[] = this.gerarArrayMarcacao(somaGabarito);
         boolean arrayMarcado[] = this.gerarArrayMarcacao(somaMarcada);
-        
-        int nAlternativasCertas = 0;       
-        for (int i = 0; i < arrayGabarito.length; i++){
-            if (arrayGabarito[i]){
+
+        int nAlternativasCertas = 0;
+        for (int i = 0; i < arrayGabarito.length; i++) {
+            if (arrayGabarito[i]) {
                 nAlternativasCertas++;
             }
-        } 
-        
-        
-        for (int i = 0; i < checkBoxes.length; i++){
+        }
+
+        for (int i = 0; i < checkBoxes.length; i++) {
             checkBoxes[i].setForeground(Color.BLACK);
         }
-        
-        
+
         int nMarcadasCerto = 0;
         int nMarcadasErrado = 0;
-        for (int i = 0; i < checkBoxes.length; i++){
-            
-            if (arrayGabarito[i] == true && arrayMarcado[i] == true){
+        for (int i = 0; i < checkBoxes.length; i++) {
+
+            if (arrayGabarito[i] == true && arrayMarcado[i] == true) {
                 checkBoxes[i].setForeground(Color.BLUE);
                 nMarcadasCerto++;
             }
-            
-            if (arrayGabarito[i] == false && arrayMarcado[i] == true){
+
+            if (arrayGabarito[i] == false && arrayMarcado[i] == true) {
                 checkBoxes[i].setForeground(Color.red);
                 nMarcadasErrado++;
             }
-            
+
         }
-        
-        if (nMarcadasErrado > 0){
+
+        if (nMarcadasErrado > 0) {
             return 0;
-        }else{
+        } else {
             return 1.0 * this.pontuacao * nMarcadasCerto / nAlternativasCertas;
         }
-        
-        
-        
+
     }
-    
-    
-    public void atualizarQuestaoTela(){
+
+    public void atualizarQuestaoTela() {
         jLabelDisciplina.setText(
                 questaoAtual.getDisciplina().getNome().toUpperCase());
-        jLabelNumeroQuestao.setText("QUESTÃO "+questaoAtual.getNumero());
+        jLabelNumeroQuestao.setText("QUESTÃO " + questaoAtual.getNumero());
         jTextAreaTextoQuestao.setText(
-                questaoAtual.getTextoIntrodutorio()+"\n"+
-                questaoAtual.getEnunciado());
-        
-        jCheckBoxOp01.setText(getHTML("01) "+questaoAtual.getAlternativas()[0].getTexto()));
-        jCheckBoxOp02.setText(getHTML("02) "+questaoAtual.getAlternativas()[1].getTexto()));
-        jCheckBoxOp04.setText(getHTML("04) "+questaoAtual.getAlternativas()[2].getTexto()));
-        jCheckBoxOp08.setText(getHTML("08) "+questaoAtual.getAlternativas()[3].getTexto()));
-        if (questaoAtual.getFigura().equals("")){
+                questaoAtual.getTextoIntrodutorio() + "\n"
+                + questaoAtual.getEnunciado());
+
+        jCheckBoxOp01.setText(getHTML("01) " + questaoAtual.getAlternativas()[0].getTexto()));
+        jCheckBoxOp02.setText(getHTML("02) " + questaoAtual.getAlternativas()[1].getTexto()));
+        jCheckBoxOp04.setText(getHTML("04) " + questaoAtual.getAlternativas()[2].getTexto()));
+        jCheckBoxOp08.setText(getHTML("08) " + questaoAtual.getAlternativas()[3].getTexto()));
+        if (questaoAtual.getFigura().equals("")) {
             jButtonImagemQuestao.setEnabled(false);
-        }else{
+        } else {
             jButtonImagemQuestao.setEnabled(true);
         }
     }
-    
-    private String getHTML(String input){
+
+    private String getHTML(String input) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append(input);
         sb.append("</html>");
         return sb.toString();
     }
-    
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -225,11 +220,21 @@ public class SimuladoGUI extends javax.swing.JFrame {
         jButtonAnterior.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButtonAnterior.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/seta-esquerda.png"))); // NOI18N
         jButtonAnterior.setToolTipText("Ir para a questão anterior");
+        jButtonAnterior.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAnteriorActionPerformed(evt);
+            }
+        });
         jPanelComandosEsquerda.add(jButtonAnterior);
 
         jButtonProximo.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButtonProximo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/seta-direita.png"))); // NOI18N
         jButtonProximo.setToolTipText("Ir para a próxima questão.");
+        jButtonProximo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonProximoActionPerformed(evt);
+            }
+        });
         jPanelComandosEsquerda.add(jButtonProximo);
 
         jPanelComandos.add(jPanelComandosEsquerda);
@@ -327,6 +332,11 @@ public class SimuladoGUI extends javax.swing.JFrame {
 
         jCheckBoxOp01.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
         jCheckBoxOp01.setText("<html>01) O crescimento orientado da planta em resposta a um estímulo luminoso, tal como o observado na imagem acima, é chamado de fototropismo. </html>");
+        jCheckBoxOp01.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxOp01ActionPerformed(evt);
+            }
+        });
         jPanelElementosQuestaoDireita.add(jCheckBoxOp01);
 
         jCheckBoxOp02.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
@@ -351,7 +361,12 @@ public class SimuladoGUI extends javax.swing.JFrame {
 
         jTextFieldSomatorio.setEditable(false);
         jTextFieldSomatorio.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
-        jTextFieldSomatorio.setText("      ");        
+        jTextFieldSomatorio.setText("      ");
+        jTextFieldSomatorio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSomatorioActionPerformed(evt);
+            }
+        });
         jPanelElementosQuestaoDireitaSomatorio.add(jTextFieldSomatorio);
 
         jPanelElementosQuestaoDireita.add(jPanelElementosQuestaoDireitaSomatorio);
@@ -364,68 +379,85 @@ public class SimuladoGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButtonImagemQuestaoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonImagemQuestaoActionPerformed
-        ImagemGUI imagemGUI = 
-                new ImagemGUI(questaoAtual.getFigura(), 
-                "Imagem da Questão "+questaoAtual.getNumero());
+        ImagemGUI imagemGUI
+                = new ImagemGUI(questaoAtual.getFigura(),
+                        "Imagem da Questão " + questaoAtual.getNumero());
         imagemGUI.setVisible(true);
     }//GEN-LAST:event_jButtonImagemQuestaoActionPerformed
 
     private void jButtonCorrigirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCorrigirActionPerformed
         double pontuacao = this.corrigirQuestao();
-        JOptionPane.showMessageDialog(this,pontuacao);
+        JOptionPane.showMessageDialog(this, pontuacao);
     }//GEN-LAST:event_jButtonCorrigirActionPerformed
-    
+
+    private void jButtonAnteriorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAnteriorActionPerformed
+        int index = prova.getQuestoes().indexOf(questaoAtual);
+        if (index > 0) {
+            questaoAtual = prova.getQuestoes().get(index - 1);
+            atualizarQuestaoTela();
+        } else {
+            JOptionPane.showMessageDialog(this, "Você já está na primeira questão.");
+        }
+    }//GEN-LAST:event_jButtonAnteriorActionPerformed
+
+    private void jButtonProximoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonProximoActionPerformed
+        int index = prova.getQuestoes().indexOf(questaoAtual);
+        if (index < prova.getQuestoes().size() - 1) {
+            questaoAtual = prova.getQuestoes().get(index + 1);
+            atualizarQuestaoTela();
+        } else {
+            JOptionPane.showMessageDialog(this, "Você já está na última questão.");
+        }
+    }//GEN-LAST:event_jButtonProximoActionPerformed
+
     private class ComboBoxHandler implements ItemListener {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
             questaoAtual = (Questao) jComboBoxEscolhaQuestao.getSelectedItem();
             atualizarQuestaoTela();
-        }        
+        }
     }
-    
+
     private class CheckBoxHandler implements ItemListener {
 
         @Override
         public void itemStateChanged(ItemEvent e) {
 
-            JCheckBox box = (JCheckBox) e.getSource();                        
-            if (box == jCheckBoxOp01){
-                if (box.isSelected()){
+            JCheckBox box = (JCheckBox) e.getSource();
+            if (box == jCheckBoxOp01) {
+                if (box.isSelected()) {
                     somaAtual += 1;
-                }else{
+                } else {
                     somaAtual -= 1;
                 }
             }
-            if (box == jCheckBoxOp02){
-                if (box.isSelected()){
+            if (box == jCheckBoxOp02) {
+                if (box.isSelected()) {
                     somaAtual += 2;
-                }else{
+                } else {
                     somaAtual -= 2;
                 }
             }
-            if (box == jCheckBoxOp04){
-                if (box.isSelected()){
+            if (box == jCheckBoxOp04) {
+                if (box.isSelected()) {
                     somaAtual += 4;
-                }else{
+                } else {
                     somaAtual -= 4;
                 }
             }
-            if (box == jCheckBoxOp08){
-                if (box.isSelected()){
+            if (box == jCheckBoxOp08) {
+                if (box.isSelected()) {
                     somaAtual += 8;
-                }else{
+                } else {
                     somaAtual -= 8;
                 }
             }
             jTextFieldSomatorio.setText(String.valueOf(somaAtual));
-            
+
         }
-        
-        
-        
+
     }
-    
 
     /**
      * @param args the command line arguments

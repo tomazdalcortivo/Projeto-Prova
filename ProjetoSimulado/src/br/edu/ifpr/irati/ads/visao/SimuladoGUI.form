@@ -83,6 +83,9 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Ir para a quest&#xe3;o anterior"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonAnteriorActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="jButtonProximo">
               <Properties>
@@ -94,6 +97,9 @@
                 </Property>
                 <Property name="toolTipText" type="java.lang.String" value="Ir para a pr&#xf3;xima quest&#xe3;o."/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonProximoActionPerformed"/>
+              </Events>
             </Component>
           </SubComponents>
         </Container>
