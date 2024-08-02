@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class ProvaDAO {
 
+    QuestaoDAO qdao = new QuestaoDAO();
+
     public Prova carregarProva() {
 
         Prova p = new Prova();
@@ -162,16 +164,7 @@ public class ProvaDAO {
                 + "nome VARCHAR(255) NOT NULL"
                 + ");";
 
-        String criarTabelaQuestao = "CREATE TABLE IF NOT EXISTS questoes ("
-                + "id INT PRIMARY KEY, "
-                + "numero INT NOT NULL, "
-                + "disciplina_id INT NOT NULL, "
-                + "texto_introdutorio TEXT, "
-                + "enunciado TEXT NOT NULL, "
-                + "figura VARCHAR(255), "
-                + "soma_gabarito INT NOT NULL, "
-                + "FOREIGN KEY (disciplina_id) REFERENCES disciplinas(id)"
-                + ");";
+
 
         String criarTabelaAlternativa = "CREATE TABLE IF NOT EXISTS alternativas ("
                 + "id INT PRIMARY KEY, "
@@ -183,9 +176,20 @@ public class ProvaDAO {
 
         try (Statement stmt = connection.createStatement()) {
             stmt.execute(criarTabelaDisciplina);
-            stmt.execute(criarTabelaQuestao);
+            stmt.execute(qdao.criarTabela());
             stmt.execute(criarTabelaAlternativa);
         }
+    }
+
+    private void inserirAlternativas(Questao questao, PreparedStatement psAlternativa) throws SQLException {
+        for (Alternativa alternativa : questao.getAlternativas()) {
+            psAlternativa.setInt(1, alternativa.getId());
+            psAlternativa.setInt(2, questao.getId());
+            psAlternativa.setString(3, alternativa.getTexto());
+            psAlternativa.setInt(4, alternativa.getValor());
+            psAlternativa.addBatch();
+        }
+        psAlternativa.executeBatch();
     }
 
     public void salvarProva(Prova prova) {
@@ -224,13 +228,7 @@ public class ProvaDAO {
                 psQuestao.setInt(7, questao.getSomaGabarito());
                 psQuestao.executeUpdate();
 
-                for (Alternativa alternativa : questao.getAlternativas()) {
-                    psAlternativa.setInt(1, alternativa.getId());
-                    psAlternativa.setInt(2, questao.getId());
-                    psAlternativa.setString(3, alternativa.getTexto());
-                    psAlternativa.setInt(4, alternativa.getValor());
-                    psAlternativa.executeUpdate();
-                }
+                inserirAlternativas(questao, psAlternativa);
             }
 
             connection.commit();
